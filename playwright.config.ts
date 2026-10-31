@@ -13,6 +13,8 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     trace: "retain-on-failure",
     launchOptions: {
+      // CI machines may have no physical GPU; still exercise the real renderer.
+      args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
       ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
         ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
         : {}),

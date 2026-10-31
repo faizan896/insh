@@ -14,6 +14,7 @@ const test = base.extend<{ noPageErrors: void }>({
 });
 
 test("the story pauses, resumes its remaining time, reaches a dedication, and replays", async ({ page }) => {
+  test.setTimeout(90_000);
   await page.goto("/");
   await expect(page).toHaveTitle("Insha — The Brightest Star");
   await expect(page.getByRole("heading", { name: "Insha", exact: true })).toBeVisible();
@@ -49,6 +50,46 @@ test("the story pauses, resumes its remaining time, reaches a dedication, and re
   await expect(page.getByRole("button", { name: "Enter the meadow" })).toBeVisible();
   await expect(page.getByRole("status")).toBeEmpty();
   await expect(page.locator(".prayer-spark")).toHaveCount(0);
+});
+
+test("the three-dimensional meadow renders, stays alive, and can be explored", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.goto("/");
+  const world = page.locator('.living-world[data-world-ready="true"]');
+  await expect(world).toBeVisible({ timeout: 45_000 });
+  const canvas = world.locator("canvas");
+  await expect(canvas).toBeVisible();
+  const resolution = await canvas.evaluate(element => {
+    if (!(element instanceof HTMLCanvasElement)) throw new Error("The world must use a real canvas");
+    return { width: element.width, height: element.height };
+  });
+  expect(resolution.width).toBeGreaterThan(100);
+  expect(resolution.height).toBeGreaterThan(100);
+
+  // Compare actual rendered pixels, rather than just checking for a canvas tag.
+  // The opening waits for the visitor, so no chapter transition causes this change.
+  await page.waitForTimeout(2000);
+  const before = await canvas.screenshot();
+  await page.waitForTimeout(1200);
+  const later = await canvas.screenshot();
+  expect(before.equals(later), "The living world should animate between rendered frames").toBe(false);
+
+  // Freeze ambient motion before testing the camera, so this comparison cannot
+  // pass solely because an animal or the water moved.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.waitForTimeout(500);
+  const still = await canvas.screenshot();
+  const bounds = await canvas.boundingBox();
+  if (!bounds) throw new Error("The world canvas must have visible bounds");
+  await page.mouse.move(bounds.x + bounds.width * .5, bounds.y + bounds.height * .5);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width * .61, bounds.y + bounds.height * .54, { steps: 12 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+  const explored = await canvas.screenshot();
+  expect(still.equals(explored), "Dragging should change the rendered camera view").toBe(false);
+  await canvas.focus();
+  await page.keyboard.press("r");
 });
 
 test("about and prayer dialogs support keyboard dismissal and return focus", async ({ page }) => {
