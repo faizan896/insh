@@ -11,6 +11,8 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3100",
     browserName: "chromium",
     viewport: { width: 1440, height: 900 },
+    // The scene must follow Pakistan even when a visitor is elsewhere.
+    timezoneId: "America/Los_Angeles",
     trace: "retain-on-failure",
     launchOptions: {
       // CI machines may have no physical GPU; still exercise the real renderer.

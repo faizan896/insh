@@ -7,11 +7,11 @@ import "@fontsource/dm-sans/500.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Insha — The Brightest Star",
-  description: "A quiet meadow. A sky full of memories. A living tribute to Insha, the brightest star in our sky.",
+  title: "Insha’s Little World — The Brightest Star",
+  description: "A living illustrated village in loving memory of Insha, with warm windows and a sky that follow the real time in Pakistan.",
   robots: { index: false, follow: false },
 };
-export const viewport: Viewport = { themeColor: "#17252d" };
+export const viewport: Viewport = { themeColor: "#142439" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en"><body>{children}</body></html>;

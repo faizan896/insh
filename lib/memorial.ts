@@ -7,8 +7,6 @@ export const memorial = {
   prayerTranslation: "Indeed, we belong to Allah, and to Him we return.",
 };
 
-export const chapters = ["The meadow", "Nightfall", "Your light", "Always"];
-
 export function seededRandom(seed: number) {
   return () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;

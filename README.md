@@ -1,10 +1,10 @@
-# Insha — The Brightest Star
+# Insha's Little World
 
-A small, peaceful 3D world made in loving memory of Insha. Sheep graze beside a flowing river, the trees move gently, and a sunlit miniature meadow turns to night. One star shines a little brighter. The experience settles into a living memorial that can be left open.
+A full-screen illustrated miniature town, made in loving memory of Insha. Flower-covered cottages, connected paths, a riverside bridge, warm windows, and a living sky form one composed artwork. The town follows the actual time in Pakistan.
 
 ## Run locally
 
-Use Node.js 24 LTS (the version used for validation) and npm. No API keys, database, accounts, or environment variables are needed.
+Use Node.js 24 LTS and npm. No accounts, API keys, database, or paid runtime services are required.
 
 ```bash
 cd /workspace/insh
@@ -12,62 +12,48 @@ npm ci
 npm run dev
 ```
 
-Open the local address printed by Next.js in your browser (port 3000 by default). For a checkout elsewhere, replace `/workspace/insh` with its directory. If using nvm, run `nvm use` first.
-
-For a production build:
+Open the local address printed by Next.js, normally on port 3000. For a checkout elsewhere, use its directory instead. With nvm, run `nvm use` first.
 
 ```bash
 npm run build
 npm start
 ```
 
-## Publish on GitHub Pages or Vercel
+The artwork requires a current browser with WebGL and graphics acceleration. This is a fixed 2.5D illustrated composition, not a freely rotatable 3D model. Its responsive framing keeps the village immersive on desktop and mobile.
 
-For GitHub Pages, `GITHUB_PAGES=true npm run build` exports the site to `out/` with the `/insh` base path. Publish the contents of `out/` to the `gh-pages` branch. In the repository's **Settings → Pages**, choose **Deploy from a branch**, branch **gh-pages**, folder **/(root)**, and save. GitHub will show the live website address after its deployment completes.
+## A living town, in Pakistan's time
 
-For Vercel, import `faizan896/insh`, keep the detected Next.js defaults, and deploy. Leave `GITHUB_PAGES` unset on Vercel so the website is served from the root URL.
+`getTownTime()` in `lib/town/clock.ts` reads the real instant through `Intl.DateTimeFormat` with the explicit `Asia/Karachi` timezone. A visitor's location does not change the town's time. The interface refreshes its clock every second and when the page becomes visible again.
 
-## The experience
+Lighting uses smooth, artistic twilight bands: dawn from 05:00–07:00 PKT and dusk from 17:00–19:00 PKT. These are visual schedules, not location-specific astronomical sunrise calculations. There is no repeating demo cycle or production time override. Environmental animation uses an absolute world epoch, so it does not restart from the same pose whenever someone arrives.
 
-- The opening waits for you to **Enter the meadow**. Four chapters then unfold over approximately 31 seconds: The meadow, Nightfall, Your light, and Always. Text dissolves gently between them.
-- **Pause story** preserves your place; **Continue** or the four discreet chapter markers let you move at your own pace. The landscape remains alive while the story is paused.
-- Drag the meadow to look around; scroll to look closer. With the scene focused, `+` and `-` adjust the view, and `R` restores it. At the end, **Send a little prayer** carries a small light into the three-dimensional sky. Prayers are symbolic, private, and never stored or transmitted.
-- **A moment of prayer** opens an optional spiritual dedication. The information button explains the memorial. Both dialogs support Escape, keyboard focus trapping, and focus restoration.
-- Ambient sound starts **off**. The sound button creates a quiet original harmonic soundscape in the browser; it downloads no audio files. Use **Sound off** at any time to fade it out.
-- **Experience again** returns to the opening. Nothing requires a particular pace.
-- If the device requests reduced motion, the scene remains still and the chapters advance only when **Continue** is selected. The controls also work on touchscreens and with a keyboard.
+Select Insha's star to reveal **“Insha”** and **“The brightest star in our sky.”** The quiet prayer interaction sends a small light toward the sky. Prayers are private visual gestures: nothing is stored, counted, or transmitted. Optional ambient sound starts muted. Reduced-motion preferences stop environmental movement while the clock continues to follow real Pakistan time.
 
-## Personalize
+## Artwork and rendering
 
-Edit `lib/memorial.ts` for the name, subtitle, closing line, and prayer. The opening and chapter poetry are in `app/page.tsx`. The closing line uses the configurable copy. No dates, photos, or biographical details have been invented.
+The matched day and night illustrations were generated for this project using OpenAI image generation, then optimized into WebP assets in `public/art/` (approximately 1.2 MB combined). They are custom generated illustrations; they are not claimed to be human hand-painted artwork. No stock illustration collection or third-party model pack is used. Fontsource fonts and software dependencies retain their own upstream licenses.
 
-Color, atmosphere, timing, and responsive layout are in `app/globals.css` and `app/page.tsx`. The title and description are in `app/layout.tsx`. Search indexing is disabled by default for this personal tribute; adjust the metadata if you choose to make it public.
+Three.js composites the illustrated art through a WebGL shader. Art-space masks restrict flowing-water refraction and foliage movement to their intended regions. A separate Canvas 2D layer draws drifting atmosphere, anchored chimney smoke, occasional bird passages, fireflies, window light, and the prayer effect. Cormorant Garamond and DM Sans are bundled locally. No external art, font, model, or audio requests are needed after installation.
 
-## Structure
+## Scene architecture
 
 ```text
-app/                     Next.js App Router, metadata, global art direction
-components/LivingWorld  WebGL scene, camera, renderer lifecycle, and sky
-components/AudioToggle  Optional procedural Web Audio ambience
-components/QuietDialog  Native accessible remembrance and prayer dialogs
-lib/world/terrain.ts     Sculpted pasture, footpath, and flowing water
-lib/world/scenery.ts     Instanced trees, grass, flowers, and bridge
-lib/world/animals.ts     Woolly sheep, walking, grazing, and terrain attachment
-lib/world/lighting.ts    Independent daylight and moonlight rig
-lib/world/types.ts       Shared environment conditions and animation-system API
-lib/memorial.ts          Tribute content and chapter names
-tests/                   Browser interaction and responsive checks
+app/                      Full-screen interface, metadata, and responsive styling
+components/TownWorld.tsx   Artwork composition, renderer lifecycle, and animation
+components/AudioToggle    Optional procedural Web Audio ambience
+lib/town/clock.ts         Real Pakistan time and smooth lighting conditions
+lib/town/scene.ts         Typed scene manifest, anchors, masks, and painted layers
+lib/town/effects.ts       Continuous atmosphere and local environmental details
+lib/memorial.ts           Tribute text
+public/art/               Matched day/night illustrated assets
+tests/                    Clock, rendering, interaction, and responsive checks
 ```
 
-Next.js, React, TypeScript, Tailwind CSS 4, and Framer Motion power the interface. Three.js renders the original 3D landscape with real lighting and shadows, grazing sheep, instanced foliage, animated water, fireflies, and stars. Cormorant Garamond and DM Sans are bundled locally through Fontsource. After installation, the application does not need external images, models, fonts, audio, or paid services. A current browser with WebGL and hardware acceleration is required; the page explains this if WebGL cannot start.
+The scene manifest uses normalized art coordinates for buildings, windows, chimneys, lanterns, foliage, and river masks. Its painted-layer registry accepts separately illustrated transparent building or seasonal layers with matched day/night textures, bounds, and drawing order. The renderer already supports this registry. Additions can share the existing clock, atmosphere, and lighting without replacing the application. After changing the base composition, update its anchors and masks to keep animation attached to the artwork.
 
-## Scene architecture and future direction
+Edit tribute copy in `lib/memorial.ts` and `app/page.tsx`; metadata lives in `app/layout.tsx`. No personal dates or biographical details have been invented. Search indexing is disabled by default for this personal tribute.
 
-The current world is a meadow. No town, houses, or real-time wall clock are implemented. Each environment module owns its meshes and animation; `LivingWorld` owns the renderer and camera and dispatches a shared `WorldFrame`. Environmental motion is independent of story playback. Instancing keeps the grass, flowers, wool, and foliage practical to render.
-
-Lighting receives `EnvironmentConditions` rather than reading a clock. `chapterConditions` currently supplies the day-to-night sequence. A future time provider synchronized to `Asia/Karachi` can replace that provider and drive the same lighting rig. Roads, houses, windows, and additional inhabitants can be added as separate world systems. An epoch-based animation clock could then reconstruct their activity when a visitor returns. This keeps future town growth separate from the memorial's story and interface.
-
-## Validation
+## Validate
 
 ```bash
 npm run typecheck
@@ -76,6 +62,14 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-The browser suite starts a production server on port 3100 and exercises actual WebGL rendering and animation, camera exploration, the journey, pause/resume timing, prayer, replay, audio controls, dialog keyboard/focus behavior, reduced motion, and two phone sizes. It enables Chromium's software WebGL for GPU-free CI. If Chromium is already installed, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its executable path instead of downloading Playwright's browser. In the cloud environment, this is `/usr/bin/chromium`.
+The suite contains nine browser checks and four pure clock checks. It covers rendered artwork, continuous animation, real Pakistan lighting, the star dedication, prayer, sound, reduced motion, accessibility, and desktop/mobile framing. Browser tests use `page.clock.setFixedTime()` only inside the tests; production has no time-preview control. The pure clock checks cover UTC date rollover, twilight continuity, golden light, and independence from the visitor's timezone.
 
-The cloud sandbox requires approved network/process permissions for installation, local servers, the Next.js compiler, and browser checks. Keep the inherited proxy and certificate settings. Each cloud task is already isolated; use the existing checkout and do not create a Git worktree unless explicitly requested.
+Playwright starts a production server on port 3100 and enables software WebGL for GPU-free CI. To use an installed Chromium, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its path; in the cloud environment this is `/usr/bin/chromium`.
+
+## Publish
+
+For GitHub Pages, run `GITHUB_PAGES=true npm run build`. Publish the contents of `out/`, including `.nojekyll`, to the existing `gh-pages` branch, preserving its Git history and any custom-domain `CNAME`. The export uses the `/insh` base path. Repository Pages settings must use **Deploy from a branch → gh-pages → /(root)**. A source push to `main` alone does not update those generated files.
+
+For Vercel, import `faizan896/insh`, keep the Next.js defaults, and leave `GITHUB_PAGES` unset.
+
+Each cloud task is already isolated: use the existing checkout and do not create a Git worktree unless explicitly requested. Preserve inherited proxy and TLS trust settings. Installation, local servers, compiler workers, and browser checks may need the execution tool's supported approved permissions in the cloud sandbox.
