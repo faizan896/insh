@@ -4,10 +4,10 @@
 export type ArtPoint = readonly [number, number];
 export type Building = { id: string; chimney?: ArtPoint; windows: ArtPoint[] };
 export type FoliageRegion = { center: ArtPoint; radius: ArtPoint; phase: number };
-export type PaintedLayer = { id: string; day: string; night: string; bounds: readonly [number, number, number, number]; order: number };
+export type PaintedLayer = { id: string; day: string; golden?: string; night: string; bounds: readonly [number, number, number, number]; order: number };
 
 export const townScene = {
-  assets: { day: "art/town-day.webp", night: "art/town-night.webp" },
+  assets: { day: "art/town-day.webp", golden: "art/town-golden.webp", night: "art/town-night.webp" },
   // Transparent, separately painted buildings or seasonal details can join the
   // scene through this registry; the renderer handles their light and placement.
   layers: [] as PaintedLayer[],

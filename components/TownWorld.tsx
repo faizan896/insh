@@ -12,7 +12,7 @@ const vertexShader = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(posi
 const fragmentShader = `
   precision highp float;
   varying vec2 vUv;
-  uniform sampler2D uDay, uNight, uWater;
+  uniform sampler2D uDay, uGoldenArt, uNight, uWater;
   uniform float uMix, uTime, uGolden, uMotion;
   uniform vec2 uCover, uCenter;
   uniform vec4 uRect;
@@ -36,10 +36,9 @@ const fragmentShader = `
     vec2 sampleUv=(uv-uRect.xy)/uRect.zw;
     if((uRect.z<.999||uRect.w<.999)&&(any(lessThan(sampleUv,vec2(0.)))||any(greaterThan(sampleUv,vec2(1.)))))discard;
     sampleUv=clamp(sampleUv,vec2(0.),vec2(1.));
-    vec4 day=texture2D(uDay,sampleUv);
+    vec4 day=mix(texture2D(uDay,sampleUv),texture2D(uGoldenArt,sampleUv),uGolden);
     vec4 night=texture2D(uNight,sampleUv);
     vec3 art=mix(day.rgb,night.rgb,uMix);
-    art*=mix(vec3(1.),vec3(1.025,1.,.965),uGolden*(1.-uMix)*.45);
     gl_FragColor=vec4(art,mix(day.a,night.a,uMix));
     #include <colorspace_fragment>
   }
@@ -71,12 +70,12 @@ export default function TownWorld(props: Props) {
     element.appendChild(renderer.domElement);
     const overlay = document.createElement("canvas"); overlay.className = "town-effects"; overlay.setAttribute("aria-hidden", "true"); element.appendChild(overlay);
     const ctx = overlay.getContext("2d");
-    if (!ctx) { renderer.dispose(); current.current.onError?.("The scene could not start in this browser."); return; }
+    if (!ctx) { renderer.dispose(); renderer.domElement.remove(); overlay.remove(); current.current.onError?.("The scene could not start in this browser."); return; }
     const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2); camera.position.z = 1;
     const mask = riverMask();
     const uniforms = {
-      uDay: { value: null as THREE.Texture | null }, uNight: { value: null as THREE.Texture | null }, uWater: { value: mask },
-      uMix: { value: current.current.time.night }, uTime: { value: 0 }, uGolden: { value: 0 }, uMotion: { value: 1 },
+      uDay: { value: null as THREE.Texture | null }, uGoldenArt: { value: null as THREE.Texture | null }, uNight: { value: null as THREE.Texture | null }, uWater: { value: mask },
+      uMix: { value: current.current.time.night }, uTime: { value: 0 }, uGolden: { value: current.current.time.golden }, uMotion: { value: current.current.reducedMotion ? 0 : 1 },
       uCover: { value: new THREE.Vector2(1, 1) }, uCenter: { value: new THREE.Vector2(.5, .5) },
       uRect: { value: new THREE.Vector4(0, 0, 1, 1) },
       uFoliage: { value: townScene.foliage.map(f => new THREE.Vector4(f.center[0], 1 - f.center[1], f.radius[0], f.radius[1])) },
@@ -101,21 +100,21 @@ export default function TownWorld(props: Props) {
     }
     const observer = new ResizeObserver(resize); observer.observe(element); resize();
 
-    async function loadPair(day: string, night: string) {
-      const images = await Promise.all([day, night].map(path => loader.loadAsync(localAsset(path))));
+    async function loadLighting(day: string, golden: string, night: string) {
+      const images = await Promise.all([day, golden, night].map(path => loader.loadAsync(localAsset(path))));
       images.forEach(image => { image.colorSpace = THREE.SRGBColorSpace; image.minFilter = THREE.LinearFilter; image.magFilter = THREE.LinearFilter; });
       return images;
     }
-    loadPair(townScene.assets.day, townScene.assets.night).then(async images => {
+    loadLighting(townScene.assets.day, townScene.assets.golden, townScene.assets.night).then(async images => {
       if (disposed) { images.forEach(image => image.dispose()); return; }
-      textures.push(...images); uniforms.uDay.value = images[0]; uniforms.uNight.value = images[1];
+      textures.push(...images); uniforms.uDay.value = images[0]; uniforms.uGoldenArt.value = images[1]; uniforms.uNight.value = images[2];
       await Promise.all(townScene.layers.map(async layer => {
-        const pair = await loadPair(layer.day, layer.night);
+        const pair = await loadLighting(layer.day, layer.golden ?? layer.day, layer.night);
         if (disposed) { pair.forEach(texture => texture.dispose()); return; }
         textures.push(...pair);
         const layerMaterial = material.clone();
         // Conditions and camera mapping are shared; each building owns its art.
-        layerMaterial.uniforms = { ...uniforms, uDay: { value: pair[0] }, uNight: { value: pair[1] }, uRect: { value: new THREE.Vector4(layer.bounds[0], 1 - layer.bounds[1] - layer.bounds[3], layer.bounds[2], layer.bounds[3]) } };
+        layerMaterial.uniforms = { ...uniforms, uDay: { value: pair[0] }, uGoldenArt: { value: pair[1] }, uNight: { value: pair[2] }, uRect: { value: new THREE.Vector4(layer.bounds[0], 1 - layer.bounds[1] - layer.bounds[3], layer.bounds[2], layer.bounds[3]) } };
         layerMaterial.transparent = true;
         const painted = new THREE.Mesh(geometry, layerMaterial); painted.name = layer.id; painted.renderOrder = layer.order + 1;
         scene.add(painted); layerMaterials.push(layerMaterial);

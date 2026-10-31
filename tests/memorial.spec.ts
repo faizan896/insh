@@ -72,10 +72,21 @@ test("night in Pakistan changes the painted lighting as well as the clock label"
   await page.waitForTimeout(800);
   const nightArt = await page.locator(".town-stage").screenshot();
 
-  await openTown(page, DAY);
+  // Change the real clock source without reloading: the running world must
+  // resample Pakistan time and update its lighting, not only initialize once.
+  await page.clock.setFixedTime(new Date(DAY));
+  await expect(page.locator("main")).toHaveAttribute("data-phase", "day");
+  await expect(page.locator(".pakistan-time time")).toHaveText("12:00 PKT");
   await page.waitForTimeout(800);
   const daylightArt = await page.locator(".town-stage").screenshot();
   expect(nightArt.equals(daylightArt), "The scene's lighting must change, not only its interface label").toBe(false);
+
+  await page.clock.setFixedTime(new Date("2026-11-01T12:00:00.000Z")); // 17:00 PKT, golden hour.
+  await expect(page.locator("main")).toHaveAttribute("data-phase", "evening");
+  await expect(page.locator(".pakistan-time time")).toHaveText("17:00 PKT");
+  await page.waitForTimeout(800);
+  const goldenArt = await page.locator(".town-stage").screenshot();
+  expect(goldenArt.equals(daylightArt), "Golden hour should have its own painted light and longer shadows").toBe(false);
 });
 
 test("Insha's star opens a dedication and supports keyboard dismissal and prayer", async ({ page }) => {

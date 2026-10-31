@@ -31,7 +31,7 @@ Select Insha's star to reveal **“Insha”** and **“The brightest star in our
 
 ## Artwork and rendering
 
-The matched day and night illustrations were generated for this project using OpenAI image generation, then optimized into WebP assets in `public/art/` (approximately 1.2 MB combined). They are custom generated illustrations; they are not claimed to be human hand-painted artwork. No stock illustration collection or third-party model pack is used. Fontsource fonts and software dependencies retain their own upstream licenses.
+The matched clear-day, golden-hour, and night illustrations were generated for this project using OpenAI image generation, then optimized into local WebP assets in `public/art/`. They are custom generated illustrations; they are not claimed to be human hand-painted artwork. No stock illustration collection or third-party model pack is used. Fontsource fonts and software dependencies retain their own upstream licenses.
 
 Three.js composites the illustrated art through a WebGL shader. Art-space masks restrict flowing-water refraction and foliage movement to their intended regions. A separate Canvas 2D layer draws drifting atmosphere, anchored chimney smoke, occasional bird passages, fireflies, window light, and the prayer effect. Cormorant Garamond and DM Sans are bundled locally. No external art, font, model, or audio requests are needed after installation.
 
@@ -45,11 +45,11 @@ lib/town/clock.ts         Real Pakistan time and smooth lighting conditions
 lib/town/scene.ts         Typed scene manifest, anchors, masks, and painted layers
 lib/town/effects.ts       Continuous atmosphere and local environmental details
 lib/memorial.ts           Tribute text
-public/art/               Matched day/night illustrated assets
+public/art/               Matched daylight, golden-hour, and night artwork
 tests/                    Clock, rendering, interaction, and responsive checks
 ```
 
-The scene manifest uses normalized art coordinates for buildings, windows, chimneys, lanterns, foliage, and river masks. Its painted-layer registry accepts separately illustrated transparent building or seasonal layers with matched day/night textures, bounds, and drawing order. The renderer already supports this registry. Additions can share the existing clock, atmosphere, and lighting without replacing the application. After changing the base composition, update its anchors and masks to keep animation attached to the artwork.
+The scene manifest uses normalized art coordinates for buildings, windows, chimneys, lanterns, foliage, and river masks. Its painted-layer registry accepts separately illustrated transparent building or seasonal layers with matched day/night textures, an optional golden-hour texture, bounds, and drawing order. The renderer already supports this registry. Additions can share the existing clock, atmosphere, and lighting without replacing the application. After changing the base composition, update its anchors and masks to keep animation attached to the artwork.
 
 Edit tribute copy in `lib/memorial.ts` and `app/page.tsx`; metadata lives in `app/layout.tsx`. No personal dates or biographical details have been invented. Search indexing is disabled by default for this personal tribute.
 
