@@ -1,4 +1,4 @@
 :HL["/insh/_next/static/chunks/1hiz_eo8xjy-9.css","style"]
 :HC["/",""]
 1:[["children",{"s":"__PAGE__","h":160}]]
-0:{"b":"lWzdellne_ClCYWcUG9k9","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"3hYMqCg2P6NIf-wZKEjrp","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
