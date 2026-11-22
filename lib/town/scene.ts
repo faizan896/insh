@@ -47,6 +47,7 @@ export function mapPoint(layout: ArtLayout, point: ArtPoint): [number, number] {
 
 export function localAsset(path: string) {
   // The same exported files work at / on Vercel and /insh/ on GitHub Pages.
-  const route = window.location.pathname.replace(/\/?$/, "/");
+  // A page opened as /insh/index.html still loads its art from /insh/.
+  const route = window.location.pathname.replace(/\/[^/]*\.[^/]*$/, "").replace(/\/?$/, "/");
   return new URL(path, window.location.origin + route).href;
 }
